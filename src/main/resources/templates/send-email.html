@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Send Email to Users</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<h1>User Email Management</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Profile Photo</th>
+            <th>Subject</th>
+            <th>Message</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.email}">Email</td>
+        <td><img th:src="@{/static/images/{photoPath}(photoPath=${user.photoPath})}" alt="Profile photo" width="50"></td>
+        <td><input type="text" th:name="'subject-' + ${user.email}" placeholder="Subject"></td>
+        <td><textarea th:name="'message-' + ${user.email}" placeholder="Message"></textarea></td>
+        <td><button th:onclick="'sendEmail(' + &quot;'${user.email}'&quot; + ')'">Send</button></td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    function sendEmail(email) {
+        const subjectField = document.querySelector(`input[name='subject-${email}']`);
+        const messageField = document.querySelector(`textarea[name='message-${email}']`);
+        const subject = subjectField.value;
+        const message = messageField.value;
+
+        fetch('/send-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, subject, message })
+        }).then(response => {
+            if (response.ok) {
+                alert('Email sent successfully!');
+                subjectField.value = '';
+                messageField.value = '';
+            } else {
+                alert('Failed to send email.');
+            }
+        });
+    }
+</script>
+</body>
+</html>

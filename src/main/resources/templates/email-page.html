@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Send Email to Users</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: auto;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .form-container {
+            margin: 20px auto;
+            width: 80%;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .form-container input, .form-container textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+<h1 style="text-align: center;">Send Emails to Users</h1>
+
+<div class="form-container">
+    <!-- Display Success or Failure Messages -->
+    <div th:if="${successMessage}" style="color: green;">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}" style="color: red;">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <!-- Email Sending Table -->
+    <table>
+        <thead>
+        <tr>
+            <th>Email</th>
+            <th>Photo</th>
+            <th>Subject</th>
+            <th>Message</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.email}"></td>
+            <td>
+                <img th:src="${user.photoPath}" alt="User Photo" width="100" height="100" />
+            </td>
+            <!-- Subject Field for Each User -->
+            <td>
+                <input type="text" id="subject-${user.id}" placeholder="Enter email subject" />
+            </td>
+            <!-- Message Field for Each User -->
+            <td>
+                <textarea id="message-${user.id}" placeholder="Enter your message"></textarea>
+            </td>
+            <!-- Send Button for Each Email -->
+            <td>
+                <form method="POST" action="/users/send-email">
+                    <input type="hidden" name="email" th:value="${user.email}" />
+                    <input type="hidden" name="subject" th:id="'hidden-subject-' + ${user.id}" />
+                    <input type="hidden" name="message" th:id="'hidden-message-' + ${user.id}" />
+                    <button type="button" th:onclick="'sendEmail(' + ${user.id} + ')'">Send</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // JavaScript function to handle emailing a specific user
+    function sendEmail(userId) {
+        // Fetch user-specific inputs
+        const subjectInput = document.getElementById(`subject-${userId}`);
+        const messageInput = document.getElementById(`message-${userId}`);
+
+        // Set the hidden form fields with user input
+        document.getElementById(`hidden-subject-${userId}`).value = subjectInput.value;
+        document.getElementById(`hidden-message-${userId}`).value = messageInput.value;
+
+        // Submit the form
+        subjectInput.closest('form').submit();
+    }
+</script>
+</body>
+</html>
